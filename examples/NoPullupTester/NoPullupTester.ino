@@ -1,4 +1,4 @@
-#include <OneWire.h>
+#include <OneWireNoResistor.h>
 #include <DallasTemperature.h>
 
 // This is an updated version of the Tester program that comes with the DallasTemp library
@@ -16,7 +16,7 @@
 // #define BUSFAIL 
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
+OneWireNoResistor oneWire(ONE_WIRE_BUS);
 
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);

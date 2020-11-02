@@ -1,4 +1,4 @@
-#include <OneWire.h>
+#include <OneWireNoResistor.h>
 
 /*
  * DS2408 8-Channel Addressable Switch
@@ -21,7 +21,7 @@ void PrintBytes(uint8_t* addr, uint8_t count, bool newline=0) {
     Serial.println();
 }
 
-void ReadAndReport(OneWire* net, uint8_t* addr) {
+void ReadAndReport(OneWireNoResistor* net, uint8_t* addr) {
   Serial.print("  Reading DS2408 ");
   PrintBytes(addr, 8);
   Serial.println();
@@ -34,7 +34,7 @@ void ReadAndReport(OneWire* net, uint8_t* addr) {
   net->read_bytes(buf+3, 10);     // 3 cmd bytes, 6 data bytes, 2 0xFF, 2 CRC16
   net->reset();
 
-  if (!OneWire::check_crc16(buf, 11, &buf[11])) {
+  if (!OneWireNoResistor::check_crc16(buf, 11, &buf[11])) {
     Serial.print("CRC failure in DS2408 at ");
     PrintBytes(addr, 8, true);
     return;
@@ -44,7 +44,7 @@ void ReadAndReport(OneWire* net, uint8_t* addr) {
   Serial.println(buf[3], BIN);
 }
 
-OneWire net(10);  // on pin 10
+OneWireNoResistor net(10);  // on pin 10
 
 void setup(void) {
   Serial.begin(9600);
@@ -62,7 +62,7 @@ void loop(void) {
     return;
   }
   
-  if (OneWire::crc8(addr, 7) != addr[7]) {
+  if (OneWireNoResistor::crc8(addr, 7) != addr[7]) {
     Serial.print("CRC is not valid!\n");
     return;
   }

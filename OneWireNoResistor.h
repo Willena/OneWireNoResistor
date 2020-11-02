@@ -1,5 +1,5 @@
-#ifndef OneWire_h
-#define OneWire_h
+#ifndef OneWireNoResistor_h
+#define OneWireNoResistor_h
 
 #include <inttypes.h>
 
@@ -21,13 +21,13 @@
 // or a small but slow algorithm.
 
 // you can exclude onewire_search by defining that to 0
-#ifndef ONEWIRE_SEARCH
-#define ONEWIRE_SEARCH 1
+#ifndef OneWireNoResistor_SEARCH
+#define OneWireNoResistor_SEARCH 1
 #endif
 
 // You can exclude CRC checks altogether by defining this to 0
-#ifndef ONEWIRE_CRC
-#define ONEWIRE_CRC 1
+#ifndef OneWireNoResistor_CRC
+#define OneWireNoResistor_CRC 1
 #endif
 
 // Select the table-lookup method of computing the 8-bit CRC
@@ -35,14 +35,14 @@
 // about 250 bytes.  It does NOT consume RAM (but did in very
 // old versions of OneWire).  If you disable this, a slower
 // but very compact algorithm is used.
-#ifndef ONEWIRE_CRC8_TABLE
-#define ONEWIRE_CRC8_TABLE 1
+#ifndef OneWireNoResistor_CRC8_TABLE
+#define OneWireNoResistor_CRC8_TABLE 1
 #endif
 
 // You can allow 16-bit CRC checks by defining this to 1
 // (Note that ONEWIRE_CRC must also be 1.)
-#ifndef ONEWIRE_CRC16
-#define ONEWIRE_CRC16 1
+#ifndef OneWireNoResistor_CRC16
+#define OneWireNoResistor_CRC16 1
 #endif
 
 #define FALSE 0
@@ -109,13 +109,13 @@
 #endif
 
 
-class OneWire
+class OneWireNoResistor
 {
   private:
     IO_REG_TYPE bitmask;
     volatile IO_REG_TYPE *baseReg;
 
-#if ONEWIRE_SEARCH
+#if OneWireNoResistor_SEARCH
     // global search state
     unsigned char ROM_NO[8];
     uint8_t LastDiscrepancy;
@@ -124,7 +124,7 @@ class OneWire
 #endif
 
   public:
-    OneWire( uint8_t pin);
+    OneWireNoResistor( uint8_t pin);
 
     // Perform a 1-Wire reset cycle. Returns 1 if a device responds
     // with a presence pulse.  Returns 0 if there is no device or the
@@ -173,7 +173,7 @@ class OneWire
     // someone shorts your bus.
     void depower(void);
 
-#if ONEWIRE_SEARCH
+#if OneWireNoResistor_SEARCH
     // Clear the search state so that if will start from the beginning again.
     void reset_search();
 
@@ -190,12 +190,12 @@ class OneWire
     uint8_t search(uint8_t *newAddr);
 #endif
 
-#if ONEWIRE_CRC
+#if OneWireNoResistor_CRC
     // Compute a Dallas Semiconductor 8 bit CRC, these are used in the
     // ROM and scratchpad registers.
     static uint8_t crc8(const uint8_t *addr, uint8_t len);
 
-#if ONEWIRE_CRC16
+#if OneWireNoResistor_CRC16
     // Compute the 1-Wire CRC16 and compare it against the received CRC.
     // Example usage (reading a DS2408):
     //    // Put everything in a buffer so we can compute the CRC easily.

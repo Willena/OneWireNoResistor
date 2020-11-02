@@ -121,15 +121,15 @@ sample code bearing this copyright.
 //--------------------------------------------------------------------------
 */
 
-#include "OneWire.h"
+#include "OneWireNoResistor.h"
 
 
-OneWire::OneWire(uint8_t pin)
+OneWireNoResistor::OneWireNoResistor(uint8_t pin)
 {
 	pinMode(pin, INPUT);
 	bitmask = PIN_TO_BITMASK(pin);
 	baseReg = PIN_TO_BASEREG(pin);
-#if ONEWIRE_SEARCH
+#if OneWireNoResistor_SEARCH
 	reset_search();
 #endif
 }
@@ -150,7 +150,7 @@ static uint8_t busFailFlag; 	// Set to one if bus failed to return to high via p
 
 // Leaves with internal pull-up enabled
 
-uint8_t OneWire::reset(void)
+uint8_t OneWireNoResistor::reset(void)
 {
 	uint8_t r;
 
@@ -204,7 +204,7 @@ uint8_t OneWire::reset(void)
 // Would have been cleaner to fold this into a reset() return value, but that could have 
 // broken existing code that explicitly checks for reset() to have value of 1 to detect failure. 
 
-uint8_t OneWire::busFail() {
+uint8_t OneWireNoResistor::busFail() {
 	return busFailFlag;
 }
 
@@ -214,7 +214,7 @@ uint8_t OneWire::busFail() {
 //
 // Leaves bus actively driven high
 
-void OneWire::write_bit(uint8_t v)
+void OneWireNoResistor::write_bit(uint8_t v)
 {
 	IO_REG_TYPE mask=bitmask;
 	volatile IO_REG_TYPE *reg IO_REG_ASM = baseReg;
@@ -244,7 +244,7 @@ void OneWire::write_bit(uint8_t v)
 //
 // Leaves bus with internal pull-up enabled 
 
-uint8_t OneWire::read_bit(void)
+uint8_t OneWireNoResistor::read_bit(void)
 {
 	IO_REG_TYPE mask=bitmask;
 	volatile IO_REG_TYPE *reg IO_REG_ASM = baseReg;
@@ -275,11 +275,11 @@ uint8_t OneWire::read_bit(void)
 // parasite power mode) then set 'power' to 1, otherwise the pin will
 // be left with pull-up enabled 
 
-void OneWire::write(uint8_t v, uint8_t power /* = 0 */) {
+void OneWireNoResistor::write(uint8_t v, uint8_t power /* = 0 */) {
     uint8_t bitMask;
 
     for (bitMask = 0x01; bitMask; bitMask <<= 1) {
-		OneWire::write_bit( (bitMask & v)?1:0);
+		OneWireNoResistor::write_bit( (bitMask & v)?1:0);
     }
 	
 	// write_bit always returns with bus actively driven high,
@@ -292,7 +292,7 @@ void OneWire::write(uint8_t v, uint8_t power /* = 0 */) {
     }
 }
 
-void OneWire::write_bytes(const uint8_t *buf, uint16_t count, bool power /* = 0 */) {
+void OneWireNoResistor::write_bytes(const uint8_t *buf, uint16_t count, bool power /* = 0 */) {
   for (uint16_t i = 0 ; i < count ; i++) {
     write(buf[i] , power );
   }
@@ -301,17 +301,17 @@ void OneWire::write_bytes(const uint8_t *buf, uint16_t count, bool power /* = 0 
 //
 // Read a byte
 //
-uint8_t OneWire::read() {
+uint8_t OneWireNoResistor::read() {
     uint8_t bitMask;
     uint8_t r = 0;
 
     for (bitMask = 0x01; bitMask; bitMask <<= 1) {
-	if ( OneWire::read_bit()) r |= bitMask;
+	if ( OneWireNoResistor::read_bit()) r |= bitMask;
     }
     return r;
 }
 
-void OneWire::read_bytes(uint8_t *buf, uint16_t count) {
+void OneWireNoResistor::read_bytes(uint8_t *buf, uint16_t count) {
   for (uint16_t i = 0 ; i < count ; i++)
     buf[i] = read();
 }
@@ -319,7 +319,7 @@ void OneWire::read_bytes(uint8_t *buf, uint16_t count) {
 //
 // Do a ROM select
 //
-void OneWire::select(const uint8_t rom[8])
+void OneWireNoResistor::select(const uint8_t rom[8])
 {
     uint8_t i;
 
@@ -331,25 +331,25 @@ void OneWire::select(const uint8_t rom[8])
 //
 // Do a ROM skip
 //
-void OneWire::skip()
+void OneWireNoResistor::skip()
 {
     write(0xCC);           // Skip ROM
 }
 
-void OneWire::depower()
+void OneWireNoResistor::depower()
 {
 	noInterrupts();
 	DIRECT_MODE_INPUT(baseReg, bitmask);
 	interrupts();
 }
 
-#if ONEWIRE_SEARCH
+#if OneWireNoResistor_SEARCH
 
 //
 // You need to use this function to start a search again from the beginning.
 // You do not need to do it for the first search, though you could.
 //
-void OneWire::reset_search()
+void OneWireNoResistor::reset_search()
 {
   // reset the search state
   LastDiscrepancy = 0;
@@ -364,7 +364,7 @@ void OneWire::reset_search()
 // Setup the search to find the device type 'family_code' on the next call
 // to search(*newAddr) if it is present.
 //
-void OneWire::target_search(uint8_t family_code)
+void OneWireNoResistor::target_search(uint8_t family_code)
 {
    // set the search state to find SearchFamily type devices
    ROM_NO[0] = family_code;
@@ -391,7 +391,7 @@ void OneWire::target_search(uint8_t family_code)
 // Return TRUE  : device found, ROM number in ROM_NO buffer
 //        FALSE : device not found, end of search
 //
-uint8_t OneWire::search(uint8_t *newAddr)
+uint8_t OneWireNoResistor::search(uint8_t *newAddr)
 {
    uint8_t id_bit_number;
    uint8_t last_zero, rom_byte_number, search_result;
@@ -511,12 +511,12 @@ uint8_t OneWire::search(uint8_t *newAddr)
 
 #endif
 
-#if ONEWIRE_CRC
+#if OneWireNoResistor_CRC
 // The 1-Wire CRC scheme is described in Maxim Application Note 27:
 // "Understanding and Using Cyclic Redundancy Checks with Maxim iButton Products"
 //
 
-#if ONEWIRE_CRC8_TABLE
+#if OneWireNoResistor_CRC8_TABLE
 // This table comes from Dallas sample code where it is freely reusable,
 // though Copyright (C) 2000 Dallas Semiconductor Corporation
 static const uint8_t PROGMEM dscrc_table[] = {
@@ -544,7 +544,7 @@ static const uint8_t PROGMEM dscrc_table[] = {
 // compared to all those delayMicrosecond() calls.  But I got
 // confused, so I use this table from the examples.)
 //
-uint8_t OneWire::crc8(const uint8_t *addr, uint8_t len)
+uint8_t OneWireNoResistor::crc8(const uint8_t *addr, uint8_t len)
 {
 	uint8_t crc = 0;
 
@@ -558,7 +558,7 @@ uint8_t OneWire::crc8(const uint8_t *addr, uint8_t len)
 // Compute a Dallas Semiconductor 8 bit CRC directly.
 // this is much slower, but much smaller, than the lookup table.
 //
-uint8_t OneWire::crc8(const uint8_t *addr, uint8_t len)
+uint8_t OneWireNoResistor::crc8(const uint8_t *addr, uint8_t len)
 {
 	uint8_t crc = 0;
 	
@@ -575,14 +575,14 @@ uint8_t OneWire::crc8(const uint8_t *addr, uint8_t len)
 }
 #endif
 
-#if ONEWIRE_CRC16
-bool OneWire::check_crc16(const uint8_t* input, uint16_t len, const uint8_t* inverted_crc, uint16_t crc)
+#if OneWireNoResistor_CRC16
+bool OneWireNoResistor::check_crc16(const uint8_t* input, uint16_t len, const uint8_t* inverted_crc, uint16_t crc)
 {
     crc = ~crc16(input, len, crc);
     return (crc & 0xFF) == inverted_crc[0] && (crc >> 8) == inverted_crc[1];
 }
 
-uint16_t OneWire::crc16(const uint8_t* input, uint16_t len, uint16_t crc)
+uint16_t OneWireNoResistor::crc16(const uint8_t* input, uint16_t len, uint16_t crc)
 {
     static const uint8_t oddparity[16] =
         { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };

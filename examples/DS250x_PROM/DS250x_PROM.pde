@@ -22,8 +22,8 @@ DS250x add-only programmable memory reader w/SKIP ROM.
  
  */
 
-#include <OneWire.h>
-OneWire ds(6);                    // OneWire bus on digital pin 6
+#include <OneWireNoResistor.h>
+OneWireNoResistor ds(6);                    // OneWire bus on digital pin 6
 void setup() {
   Serial.begin (9600);
 }
@@ -47,7 +47,7 @@ void loop() {
     ds.write(leemem[2],1);        // MSB starting address, leave ghost power on
 
     ccrc = ds.read();             // DS250x generates a CRC for the command we sent, we assign a read slot and store it's value
-    ccrc_calc = OneWire::crc8(leemem, 3);  // We calculate the CRC of the commands we sent using the library function and store it
+    ccrc_calc = OneWireNoResistor::crc8(leemem, 3);  // We calculate the CRC of the commands we sent using the library function and store it
 
     if ( ccrc_calc != ccrc) {      // Then we compare it to the value the ds250x calculated, if it fails, we print debug messages and abort
       Serial.println("Invalid command CRC!");
